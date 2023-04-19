@@ -3,10 +3,10 @@ import shutil
 
 from leapp.actors import Actor
 from leapp.libraries.stdlib import api, run
-from leapp.models import (ActiveVendorList,)
+from leapp.models import ActiveVendorList, WpToolkit
 from leapp.tags import IPUWorkflowTag, FirstBootPhaseTag
 
-VENDOR_NAME = 'wp-toolkit-cpanel'
+VENDOR_NAME = 'wp-toolkit'
 
 VENDORS_DIR = '/etc/leapp/files/vendors.d'
 REPO_DIR = '/etc/yum.repos.d'
@@ -17,7 +17,7 @@ class UpdateWpToolkitRepos(Actor):
     """
 
     name = 'update_wp_toolkit_repos'
-    consumes = (ActiveVendorList,)
+    consumes = (ActiveVendorList, WpToolkit)
     produces = ()
     tags = (IPUWorkflowTag, FirstBootPhaseTag)
 
@@ -29,8 +29,10 @@ class UpdateWpToolkitRepos(Actor):
 
         if VENDOR_NAME in active_vendors:
 
-            src_file = api.get_file_path(VENDOR_NAME + '.el8.repo')
-            dst_file = '{}/{}.repo'.format(REPO_DIR, VENDOR_NAME)
+            wptk_data = api.consume(WpToolkit)
+
+            src_file = api.get_file_path('{}-{}.el8.repo'. format(VENDOR_NAME, wptk_data.variant))
+            dst_file = '{}/{}-{}.repo'.format(REPO_DIR, VENDOR_NAME, wptk_data.variant)
 
             try:
                 os.rename(dst_file, dst_file + '.bak')
