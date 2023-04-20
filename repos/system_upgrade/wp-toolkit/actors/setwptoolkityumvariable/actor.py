@@ -47,7 +47,7 @@ class SetWpToolkitYumVariable(Actor):
             active_vendors.extend(vendor_list.data)
 
         if VENDOR_NAME in active_vendors:
-            wptk_data = api.consume(WpToolkit).next()
+            wptk_data = next(api.consume(WpToolkit), WpToolkit())
 
             preupgrade_task = None
             if wptk_data.variant == 'cpanel':
