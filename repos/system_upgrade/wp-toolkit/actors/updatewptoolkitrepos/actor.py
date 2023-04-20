@@ -29,7 +29,7 @@ class UpdateWpToolkitRepos(Actor):
 
         if VENDOR_NAME in active_vendors:
 
-            wptk_data = api.consume(WpToolkit)
+            wptk_data = api.consume(WpToolkit).next()
 
             src_file = api.get_file_path('{}-{}.el8.repo'. format(VENDOR_NAME, wptk_data.variant))
             dst_file = '{}/{}-{}.repo'.format(REPO_DIR, VENDOR_NAME, wptk_data.variant)
