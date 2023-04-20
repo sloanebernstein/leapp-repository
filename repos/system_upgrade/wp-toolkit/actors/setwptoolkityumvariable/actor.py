@@ -50,12 +50,11 @@ class SetWpToolkitYumVariable(Actor):
             wptk_data = api.consume(WpToolkit)
 
             preupgrade_task = None
-            match wptk_data.variant:
-                case 'cpanel':
-                    preupgrade_task = self._do_cpanel(wptk_data.version)
-                case _:
-                    api.current_logger().warn('Could not recognize a supported environment for WP Toolkit.')
-                    return
+            if wptk_data.variant == 'cpanel':
+                preupgrade_task = self._do_cpanel(wptk_data.version)
+            else:
+                api.current_logger().warn('Could not recognize a supported environment for WP Toolkit.')
+                return
 
             api.produce(preupgrade_task)
 
