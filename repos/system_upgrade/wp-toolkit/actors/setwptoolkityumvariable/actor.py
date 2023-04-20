@@ -50,7 +50,7 @@ class SetWpToolkitYumVariable(Actor):
             wptk_data = api.consume(WpToolkit)
 
             preupgrade_task = None
-            match wptk.variant:
+            match wptk_data.variant:
                 case 'cpanel':
                     preupgrade_task = self._do_cpanel(wptk_data.version)
                 case _:
