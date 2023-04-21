@@ -39,7 +39,7 @@ class UpdateWpToolkitRepos(Actor):
             except OSError as e:
                 api.current_logger().warn('Could not rename {} to {}: {}'.format(e.filename, e.filename2, e.strerror))
 
-            api.current_logger().info('Updating WPTK package repository file at {} using {}'.format(src_file, dst_file))
+            api.current_logger().info('Updating WPTK package repository file at {} using {}'.format(dst_file, src_file))
 
             try:
                 shutil.copy(src_file, dst_file)
