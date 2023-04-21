@@ -5,5 +5,5 @@ from leapp.topics import SystemFactsTopic
 class WpToolkit(Model):
     topic = SystemFactsTopic
 
-    variant = fields.String()
-    version = fields.String()
+    variant = fields.Nullable(fields.String())
+    version = fields.Nullable(fields.String())

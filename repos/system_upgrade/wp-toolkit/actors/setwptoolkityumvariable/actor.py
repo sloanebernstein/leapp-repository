@@ -28,15 +28,16 @@ class SetWpToolkitYumVariable(Actor):
     def _do_cpanel(self, version):
 
         files_to_copy = []
-        try:
-            with open(src_path, 'w') as var_file:
-                var_file.write(version)
+        if version is not None:
+            try:
+                with open(src_path, 'w') as var_file:
+                    var_file.write(version)
 
-            files_to_copy.append(CopyFile(src=src_path, dst=dst_path))
-            api.current_logger().debug('Requesting leapp to copy {} into the upgrade environment as {}'.format(src_path, dst_path))
+                files_to_copy.append(CopyFile(src=src_path, dst=dst_path))
+                api.current_logger().debug('Requesting leapp to copy {} into the upgrade environment as {}'.format(src_path, dst_path))
 
-        except OSError as e:
-            api.current_logger().error('Cannot write to {}: {}'.format(e.filename, e.strerror))
+            except OSError as e:
+                api.current_logger().error('Cannot write to {}: {}'.format(e.filename, e.strerror))
 
         return TargetUserSpacePreupgradeTasks(copy_files=files_to_copy)
 
@@ -54,7 +55,6 @@ class SetWpToolkitYumVariable(Actor):
                 preupgrade_task = self._do_cpanel(wptk_data.version)
             else:
                 api.current_logger().warn('Could not recognize a supported environment for WP Toolkit.')
-                return
 
             api.produce(preupgrade_task)
 
