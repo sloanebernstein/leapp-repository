@@ -1,18 +1,21 @@
 from leapp.actors import Actor
-from leapp.libraries.stdlib import api, run
-from leapp.models import ActiveVendorList, WpToolkit
+from leapp.libraries.stdlib import api
+from leapp.models import ActiveVendorList, InstalledRPM, WpToolkit
 from leapp.tags import IPUWorkflowTag, FactsPhaseTag
+from leapp.libraries.common.rpms import package_data_for
 
 VENDOR_NAME = 'wp-toolkit'
-SUPPORTED_VARIANTS = ['cpanel',]
+SUPPORTED_VARIANTS = ['cpanel', ]
+
 
 class WpToolkitFacts(Actor):
     """
-    No documentation has been provided for the wp_toolkit_facts actor.
+    Go on a fact finding mission deep in the jungles of RPM for the hidden temples of wp-toolkit.
+    Responsible for setting the 'variant' and 'version' variables in the WpToolkit model.
     """
 
     name = 'wp_toolkit_facts'
-    consumes = (ActiveVendorList,)
+    consumes = (ActiveVendorList, InstalledRPM,)
     produces = (WpToolkit,)
     tags = (IPUWorkflowTag, FactsPhaseTag)
 
@@ -20,6 +23,7 @@ class WpToolkitFacts(Actor):
 
         active_vendors = []
         for vendor_list in api.consume(ActiveVendorList):
+            api.current_logger().info('vendor_list.data: {}'.format(vendor_list.data))
             active_vendors.extend(vendor_list.data)
 
         if VENDOR_NAME in active_vendors:
@@ -27,12 +31,12 @@ class WpToolkitFacts(Actor):
 
             version = None
             for variant in SUPPORTED_VARIANTS:
-                try:
-                    result = run(['/usr/bin/rpm', '-q', '--queryformat=%{VERSION}', 'wp-toolkit-{}'.format(variant)])
-                    version = result['stdout']
+                pkgData = package_data_for(InstalledRPM, 'wp-toolkit-{}'.format(variant))
+                api.current_logger().info('pkgData: {}'.format(pkgData))
+                # name, arch, version, release
+                if pkgData:
+                    version = pkgData[2]
                     break
-                except:
-                    api.current_logger().debug('Did not find WP Toolkit variant {}'.format(variant))
 
             if version is None:
                 variant = None
