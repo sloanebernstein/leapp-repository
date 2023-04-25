@@ -144,7 +144,11 @@ def process():
 
     custom_repos.extend(vendor_repos)
 
-    api.current_logger().debug('Used repos: {}'.format(used_repoids_dict.keys()))
+    # Iterating over keys here due to linter complaints
+    dbg = '';
+    for k, v in modules_to_enable.items():
+        dbg = dbg + k + ' ';
+    api.current_logger().debug('Used repos: '.dbg)
     api.current_logger().debug('Enabled repos: {}'.format(list(enabled_repoids)))
 
     # TODO(pstodulk): isn't that a potential issue that we map just enabled repos

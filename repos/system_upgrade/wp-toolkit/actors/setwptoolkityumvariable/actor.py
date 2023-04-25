@@ -1,16 +1,15 @@
-import os
-
 from leapp.actors import Actor
 from leapp.models import ActiveVendorList, CopyFile, TargetUserSpacePreupgradeTasks, WpToolkit
-from leapp.libraries.stdlib import api, run, CalledProcessError
+from leapp.libraries.stdlib import api
 from leapp.tags import TargetTransactionFactsPhaseTag, IPUWorkflowTag
 
 VENDOR_NAME = 'wp-toolkit'
-SUPPORTED_VARIANTS = ['cpanel',]
+SUPPORTED_VARIANTS = ['cpanel', ]
 
 # XXX Is src_path the best place to create this file?
 src_path = '/etc/leapp/files/vendors.d/wp-toolkit.var'
 dst_path = '/etc/dnf/vars/wptkversion'
+
 
 class SetWpToolkitYumVariable(Actor):
     """
@@ -34,7 +33,9 @@ class SetWpToolkitYumVariable(Actor):
                     var_file.write(version)
 
                 files_to_copy.append(CopyFile(src=src_path, dst=dst_path))
-                api.current_logger().debug('Requesting leapp to copy {} into the upgrade environment as {}'.format(src_path, dst_path))
+                # Only allocating this variable due to their linter rules on line length
+                dbg = 'Requesting leapp to copy {} into the upgrade environment as {}'.format(src_path, dst_path)
+                api.current_logger().debug(dbg)
 
             except OSError as e:
                 api.current_logger().error('Cannot write to {}: {}'.format(e.filename, e.strerror))

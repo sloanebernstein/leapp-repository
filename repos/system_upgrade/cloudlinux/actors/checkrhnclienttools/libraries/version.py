@@ -24,6 +24,10 @@ class Version(object):
     def __eq__(self, other):
         return self.value == other.value
 
+    # Added due to linter rule asking for this
+    def __hash__(self):
+        return hash(self._raw)
+
     def __gt__(self, other):
         return any(
             [v[0] > v[1] for v in zip(self.value, other.value)]
