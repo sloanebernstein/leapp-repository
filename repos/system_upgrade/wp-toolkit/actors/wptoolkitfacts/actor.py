@@ -23,7 +23,6 @@ class WpToolkitFacts(Actor):
 
         active_vendors = []
         for vendor_list in api.consume(ActiveVendorList):
-            api.current_logger().info('vendor_list.data: {}'.format(vendor_list.data))
             active_vendors.extend(vendor_list.data)
 
         if VENDOR_NAME in active_vendors:
@@ -32,7 +31,6 @@ class WpToolkitFacts(Actor):
             version = None
             for variant in SUPPORTED_VARIANTS:
                 pkgData = package_data_for(InstalledRPM, 'wp-toolkit-{}'.format(variant))
-                api.current_logger().info('pkgData: {}'.format(pkgData))
                 # name, arch, version, release
                 if pkgData:
                     version = pkgData[2]
