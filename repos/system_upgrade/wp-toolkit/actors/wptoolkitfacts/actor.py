@@ -1,6 +1,6 @@
 from leapp.actors import Actor
 from leapp.libraries.stdlib import api, run
-from leapp.models import ActiveVendorList, WpToolkit
+from leapp.models import ActiveVendorList, WpToolkit, VendorSourceRepos
 from leapp.tags import IPUWorkflowTag, FactsPhaseTag
 
 VENDOR_NAME = 'wp-toolkit'
@@ -12,7 +12,7 @@ class WpToolkitFacts(Actor):
     """
 
     name = 'wp_toolkit_facts'
-    consumes = (ActiveVendorList,)
+    consumes = (ActiveVendorList, VendorSourceRepos)
     produces = (WpToolkit,)
     tags = (IPUWorkflowTag, FactsPhaseTag)
 
@@ -25,20 +25,29 @@ class WpToolkitFacts(Actor):
         if VENDOR_NAME in active_vendors:
             api.current_logger().info('Vendor {} is active. Looking for information...'.format(VENDOR_NAME))
 
-            version = None
-            for variant in SUPPORTED_VARIANTS:
-                try:
-                    result = run(['/usr/bin/rpm', '-q', '--queryformat=%{VERSION}', 'wp-toolkit-{}'.format(variant)])
-                    version = result['stdout']
+            repo_list = []
+            for src_info in api.consume(VendorSourceRepos):
+                if src_info.vendor == VENDOR_NAME:
+                    repo_list = src_info.source_repoids
                     break
-                except:
-                    api.current_logger().debug('Did not find WP Toolkit variant {}'.format(variant))
 
-            if version is None:
-                variant = None
-                api.current_logger().warn('No WP Toolkit package appears to be installed.')
-            else:
-                api.current_logger().info('Found WP Toolkit variant {}, version {}'.format(variant, version))
+            variant = None
+            version = None
+            for maybe_variant in SUPPORTED_VARIANTS:
+                if '{}-{}'.format(VENDOR_NAME, maybe_variant) in repo_list:
+                    variant = maybe_variant
+                    api.current_logger().info('Found WP Toolkit variant {}'.format(variant))
+
+                    try:
+                        result = run(['/usr/bin/rpm', '-q', '--queryformat=%{VERSION}', '{}-{}'.format(VENDOR_NAME, variant)])
+                        version = result['stdout']
+                        api.current_logger().info('Found WP Toolkit version {}'.format(version))
+                    except:
+                        api.current_logger().info('No WP Toolkit package appears to be installed.')
+
+                    break
+                else:
+                    api.current_logger().debug('Did not find WP Toolkit variant {}'.format(maybe_variant))
 
             api.produce(WpToolkit(variant=variant, version=version))
 
