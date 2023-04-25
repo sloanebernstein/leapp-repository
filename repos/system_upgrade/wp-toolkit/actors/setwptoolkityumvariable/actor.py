@@ -28,16 +28,18 @@ class SetWpToolkitYumVariable(Actor):
     def _do_cpanel(self, version):
 
         files_to_copy = []
-        if version is not None:
-            try:
-                with open(src_path, 'w') as var_file:
-                    var_file.write(version)
+        if version is None:
+            version = 'latest'
 
-                files_to_copy.append(CopyFile(src=src_path, dst=dst_path))
-                api.current_logger().debug('Requesting leapp to copy {} into the upgrade environment as {}'.format(src_path, dst_path))
+        try:
+            with open(src_path, 'w') as var_file:
+                var_file.write(version)
 
-            except OSError as e:
-                api.current_logger().error('Cannot write to {}: {}'.format(e.filename, e.strerror))
+            files_to_copy.append(CopyFile(src=src_path, dst=dst_path))
+            api.current_logger().debug('Requesting leapp to copy {} into the upgrade environment as {}'.format(src_path, dst_path))
+
+        except OSError as e:
+            api.current_logger().error('Cannot write to {}: {}'.format(e.filename, e.strerror))
 
         return TargetUserSpacePreupgradeTasks(copy_files=files_to_copy)
 
