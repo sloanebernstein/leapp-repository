@@ -1,10 +1,12 @@
 from leapp.actors import Actor
-from leapp.libraries.stdlib import api, run
-from leapp.models import ActiveVendorList, WpToolkit, VendorSourceRepos
+from leapp.libraries.stdlib import api
+from leapp.models import ActiveVendorList, WpToolkit, VendorSourceRepos, InstalledRPM
 from leapp.tags import IPUWorkflowTag, FactsPhaseTag
+from leapp.libraries.common.rpms import package_data_for
 
 VENDOR_NAME = 'wp-toolkit'
-SUPPORTED_VARIANTS = ['cpanel',]
+SUPPORTED_VARIANTS = ['cpanel', ]
+
 
 class WpToolkitFacts(Actor):
     """
@@ -12,7 +14,7 @@ class WpToolkitFacts(Actor):
     """
 
     name = 'wp_toolkit_facts'
-    consumes = (ActiveVendorList, VendorSourceRepos)
+    consumes = (ActiveVendorList, VendorSourceRepos, InstalledRPM)
     produces = (WpToolkit,)
     tags = (IPUWorkflowTag, FactsPhaseTag)
 
@@ -38,12 +40,10 @@ class WpToolkitFacts(Actor):
                     variant = maybe_variant
                     api.current_logger().info('Found WP Toolkit variant {}'.format(variant))
 
-                    try:
-                        result = run(['/usr/bin/rpm', '-q', '--queryformat=%{VERSION}', '{}-{}'.format(VENDOR_NAME, variant)])
-                        version = result['stdout']
-                        api.current_logger().info('Found WP Toolkit version {}'.format(version))
-                    except:
-                        api.current_logger().info('No WP Toolkit package appears to be installed.')
+                    pkgData = package_data_for(InstalledRPM, 'wp-toolkit-{}'.format(variant))
+                    # name, arch, version, release
+                    if pkgData:
+                        version = pkgData[0][2]
 
                     break
 
