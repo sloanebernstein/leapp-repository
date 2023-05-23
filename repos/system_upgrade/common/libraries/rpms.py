@@ -68,7 +68,7 @@ def has_package(model, package_name, arch=None, version=None, release=None, cont
     return tuple(attributes) in rpm_lookup
 
 
-def package_data_for(model, package_name, package_arch=None, package_version=None, package_release=None, context=stdlib.api):
+def package_data_for(model, package_name, context=stdlib.api):
     """
     Expects a model InstalledRedHatSignedRPM or InstalledUnsignedRPM.
     Useful for where we want to know a thing is installed
@@ -84,6 +84,6 @@ def package_data_for(model, package_name, package_arch=None, package_version=Non
         return list()
 
     lookup_keys = ['name', 'arch', 'version', 'release']
-    rpm_lookup = create_lookup(model, field='items', keys=lookup_keys, context=context)
-
-    return [(name, arch, version, release) for (name, arch, version, release) in rpm_lookup if ( (name == package_name) and (package_arch is None or arch == package_arch) and (package_version is None or version == package_version) and (package_release is None or release == package_release))]
+    for (rpmName,rpmArch,rpmVersion,rpmRelease) in create_lookup(model, field='items', keys=lookup_keys, context=context):
+        if package_name == rpmName:
+            return {'name': rpmName,'arch': rpmArch, 'version': rpmVersion, 'release': rpmRelease}

@@ -40,10 +40,10 @@ class WpToolkitFacts(Actor):
                     variant = maybe_variant
                     api.current_logger().info('Found WP Toolkit variant {}'.format(variant))
 
-                    pkgData = package_data_for(InstalledRPM, 'wp-toolkit-{}'.format(variant))
+                    pkgData = package_data_for(InstalledRPM, u'wp-toolkit-{}'.format(variant))
                     # name, arch, version, release
                     if pkgData:
-                        version = pkgData[0][2]
+                        version = pkgData['version']
 
                     break
 
